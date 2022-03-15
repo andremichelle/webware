@@ -1,2 +1,2 @@
-# typescript / sass template repository
-library for my typescript projects
+# typescript / sass
+template repository for my typescript projects
