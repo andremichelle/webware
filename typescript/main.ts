@@ -25,10 +25,26 @@ const showProgress = (() => {
     await boot.waitForCompletion()
 
     // --- BOOT ENDS ---
+    const frame = () => {
+        document.querySelector(".center").textContent = `
+            menubar.visible: ${window.menubar.visible}\n
+            devicePixelRatio: ${window.devicePixelRatio}\n
+            screenTop: ${window.screenTop}, screenLeft: ${window.screenLeft}\n
+            iw: ${window.innerWidth}, ih: ${window.innerHeight}\n
+            saw: ${window.screen.availWidth}, sah: ${window.screen.availHeight}\n
+            sw: ${window.screen.width}, sh: ${window.screen.height}`
+        requestAnimationFrame(frame)
+    }
+    frame()
 
     // prevent dragging entire document on mobile
     document.addEventListener('touchmove', (event: TouchEvent) => event.preventDefault(), {passive: false})
-    document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"))
-    document.querySelectorAll("body svg.preloader").forEach(element => element.remove())
+    const resize = () => document.body.style.height = `${window.innerHeight}px`
+    window.addEventListener("resize", resize)
+    resize()
+    requestAnimationFrame(() => {
+        document.querySelectorAll("body svg.preloader").forEach(element => element.remove())
+        document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"))
+    })
     console.debug("boot complete.")
 })()
