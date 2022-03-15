@@ -1,13 +1,17 @@
 @import common
 
+// test grid. can be removed
+
 main
-  --border: calc(var(--size) * 6)
+  --border: calc(var(--size) * 10)
   width: 100%
   height: 100%
   display: grid
   grid-template: var(--border) 1fr var(--border) / var(--border) 1fr var(--border)
 
   div
-    border: 3px dashed orange
-    grid-area: 2 / 2
-    background-color: dimgrey
+    display: flex
+    align-items: center
+    justify-content: center
+    overflow: hidden
+    font-size: calc(var(--size) * 5)
