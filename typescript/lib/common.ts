@@ -395,3 +395,66 @@ export abstract class Settings<DATA> implements Observable<Settings<DATA>>, Seri
         this.terminator.terminate()
     }
 }
+
+export class Waiting {
+    static forFrame(): Promise<void> {
+        return new Promise(resolve => requestAnimationFrame(() => resolve()))
+    }
+
+    static forFrames(count: number): Promise<void> {
+        return new Promise(resolve => {
+            const callback = () => {
+                if (--count <= 0) resolve()
+                else requestAnimationFrame(callback)
+            }
+            requestAnimationFrame(callback)
+        })
+    }
+
+    static forAnimationComplete(element: Element): Promise<void> {
+        return Waiting.forEvents(element, "animationstart", "animationend")
+    }
+
+    static forTransitionComplete(element: Element): Promise<void> {
+        return Waiting.forEvents(element, "transitionstart", "transitionend")
+    }
+
+    static forEvent(element: Element, type: string): Promise<void> {
+        return new Promise<void>((resolve) =>
+            element.addEventListener(type, () => resolve(), {once: true}))
+    }
+
+    private static forEvents(element: Element, startType: string, endType: string): Promise<void> {
+        let numProperties = 0
+        element.addEventListener(startType, event => {
+            if (event.target === element) {
+                numProperties++
+            }
+        })
+        return new Promise<void>((resolve) =>
+            element.addEventListener(endType, event => {
+                if (event.target === element) {
+                    if (--numProperties === 0) {
+                        resolve()
+                    }
+                    console.assert(numProperties >= 0)
+                }
+            }))
+    }
+}
+
+export class Events {
+    static preventDefault = event => event.preventDefault()
+
+    static async toPromise<E extends Event>(target: EventTarget, type: string): Promise<E> {
+        return new Promise<E>(resolve => target
+            .addEventListener(type, (event: E) => resolve(event), {once: true}))
+    }
+
+    static bindEventListener(target: EventTarget,
+                             type: string, listener: EventListenerOrEventListenerObject,
+                             options?: AddEventListenerOptions): Terminable {
+        target.addEventListener(type, listener, options)
+        return {terminate: () => target.removeEventListener(type, listener, options)}
+    }
+}
