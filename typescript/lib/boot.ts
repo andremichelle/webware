@@ -28,6 +28,10 @@ export const preloadImagesOfCssFile = async (pathToCss: string): Promise<void> =
     }))).then(() => Promise.resolve())
 }
 
+export interface Dependency<T> {
+    get: () => T
+}
+
 export class Boot implements Observable<Boot> {
     private readonly observable = new ObservableImpl<Boot>()
     private readonly completion = new Promise<void>((resolve: (value: void) => void) => {
@@ -57,14 +61,24 @@ export class Boot implements Observable<Boot> {
         this.observable.terminate()
     }
 
-    registerProcess<T>(promise: Promise<T>): void {
+    registerProcess<T>(promise: Promise<T>): Dependency<T> {
         console.assert(!this.completed, "Cannot register processes when boot is already completed.")
         this.totalTasks++
-        promise.then(() => {
+        let result = null
+        promise.then((value: T) => {
+            result = value
             this.finishedTasks++
             if (this.isCompleted()) this.completed = true
             this.observable.notify(this)
         })
+        return {
+            get: () => {
+                if (result === null) {
+                    throw new Error("Dependency has not been resolved.")
+                }
+                return result
+            }
+        }
     }
 
     isCompleted(): boolean {
