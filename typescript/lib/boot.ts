@@ -81,6 +81,13 @@ export class Boot implements Observable<Boot> {
         }
     }
 
+    registerFont(name: string, url: string): Dependency<FontFace> {
+        return this.registerProcess(document.fonts.ready
+            .then((faceSet: FontFaceSet) => new FontFace(name, url)
+                .load()
+                .then(fontFace => faceSet.add(fontFace))))
+    }
+
     isCompleted(): boolean {
         return this.finishedTasks === this.totalTasks
     }

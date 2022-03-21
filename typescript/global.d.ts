@@ -12,3 +12,28 @@ declare var AudioWorkletProcessor: {
 declare var sampleRate: number
 
 declare function registerProcessor<T extends AudioWorkletProcessor>(name: string, processorCtor: T): void
+
+// Spec: https://www.w3.org/TR/css-font-loading/
+type CSSOMString = string
+
+interface FontFace {
+    family: CSSOMString
+    style: CSSOMString
+    weight: CSSOMString
+
+    load(): Promise<FontFace>
+}
+
+declare var FontFace: {
+    new(family: string, url: string): FontFace
+}
+
+interface FontFaceSet {
+    readonly ready: Promise<FontFaceSet>
+
+    add(FontFace): FontFace
+}
+
+declare interface Document {
+    fonts: FontFaceSet
+}
