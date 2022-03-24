@@ -34,16 +34,6 @@ export interface Dependency<T> {
 
 export class Boot implements Observable<Boot> {
     private readonly observable = new ObservableImpl<Boot>()
-    private readonly completion = new Promise<void>((resolve: (value: void) => void) => {
-        this.observable.addObserver(boot => {
-            if (boot.isCompleted()) {
-                requestAnimationFrame(() => {
-                    resolve()
-                    boot.terminate()
-                })
-            }
-        })
-    })
 
     private finishedTasks: number = 0 | 0
     private totalTasks: number = 0 | 0
@@ -62,7 +52,6 @@ export class Boot implements Observable<Boot> {
     }
 
     registerProcess<T>(promise: Promise<T>): Dependency<T> {
-        console.assert(!this.completed, "Cannot register processes when boot is already completed.")
         this.totalTasks++
         let result = null
         promise.then((value: T) => {
@@ -101,7 +90,16 @@ export class Boot implements Observable<Boot> {
     }
 
     waitForCompletion(): Promise<void> {
-        return this.completion
+        return this.isCompleted() ? Promise.resolve() : new Promise<void>((resolve: (value: void) => void) => {
+            this.observable.addObserver(boot => {
+                if (boot.isCompleted()) {
+                    requestAnimationFrame(() => {
+                        resolve()
+                        boot.terminate()
+                    })
+                }
+            })
+        })
     }
 }
 
