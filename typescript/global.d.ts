@@ -24,10 +24,6 @@ interface FontFace {
     load(): Promise<FontFace>
 }
 
-declare var FontFace: {
-    new(family: string, url: string): FontFace
-}
-
 interface FontFaceSet {
     readonly ready: Promise<FontFaceSet>
 

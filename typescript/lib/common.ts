@@ -30,13 +30,15 @@ export class Terminator implements Terminable {
 export interface Option<T> {
     get(): T
 
-    ifPresent(callback: (value: T) => void): void
+    ifPresent<R>(callback: (value: T) => R): R
 
     contains(value: T): boolean
 
     isEmpty(): boolean
 
     nonEmpty(): boolean
+
+    map<U>(callback: (value: T) => U): Option<U>
 }
 
 export class Options {
@@ -51,9 +53,13 @@ export class Options {
 
         get = (): T => this.value
         contains = (value: T): boolean => value === this.value
-        ifPresent = (callback: (value: T) => void): void => callback(this.value)
+        ifPresent = <R>(callback: (value: T) => R): R => callback(this.value)
         isEmpty = (): boolean => false
         nonEmpty = (): boolean => true
+
+        map<U>(callback: (value: T) => U): Option<U> {
+            return Options.valueOf(callback(this.value))
+        }
 
         toString(): string {
             return `Options.Some(${this.value})`
@@ -65,13 +71,17 @@ export class Options {
             throw new Error("Option has no value")
         }
         contains = (_: never): boolean => false
-        ifPresent = (_: (value: never) => void): void => {
+        ifPresent = (_: (value: never) => never): any => {
         }
         isEmpty = (): boolean => true
         nonEmpty = (): boolean => false
 
+        map<U>(callback: (_: never) => U): Option<U> {
+            return Options.None
+        }
+
         toString(): string {
-            return `Options.None`
+            return 'Options.None'
         }
     }
 }
