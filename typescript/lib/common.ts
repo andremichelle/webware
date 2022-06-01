@@ -1,7 +1,9 @@
 // noinspection JSUnusedGlobalSymbols
 
 import {ValueMapping} from "./mapping.js"
-import {Random} from "./math"
+import {Random} from "./math.js"
+
+export type NoArgType<T> = { new(): T }
 
 export interface Terminable {
     terminate(): void
